@@ -1,0 +1,61 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16
+    container_name: postgres2
+    ports:
+      - "5090:5432"
+    environment:
+      POSTGRES_DB: new_employee_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: admin123
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - bonus-net
+    restart: always
+
+  backend:
+    build: ./Backend
+    container_name: Backend2
+    ports:
+      - "3090:3090"
+    depends_on:
+      - postgres
+    env_file:
+      - ./Backend/server.env
+    networks:
+      - bonus-net
+    restart: always
+
+  frontend:
+    build: ./Frontend
+    container_name: Frontend2
+    ports:
+      - "8149:80"
+    depends_on:
+      - backend
+    networks:
+      - bonus-net
+    restart: always
+
+  hr_page:
+    build: ./Hr_page
+    container_name: Hr_pagev2
+    ports:
+      - "8150:80"
+    depends_on:
+      - backend
+    networks:
+      - bonus-net
+    restart: always
+
+volumes:
+  pgdata:
+
+networks:
+  bonus-net:
+    driver: bridge
+
